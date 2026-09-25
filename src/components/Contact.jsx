@@ -1,6 +1,55 @@
-import { FaEnvelope, FaGithub, FaLinkedin } from "react-icons/fa";
+import { useState } from "react";
+import {
+  FaEnvelope,
+  FaGithub,
+  FaLinkedin,
+  FaTwitter,
+  FaInstagram,
+} from "react-icons/fa";
+
+import { addMessage } from "../services/messageService.js";
 
 function Contact() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+  const [status, setStatus] = useState("");
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((previous) => ({ ...previous, [name]: value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setStatus("Sending...");
+
+    const now = new Date();
+
+    try {
+      await addMessage({
+        ...formData,
+        date: now.toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        }),
+        time: now.toLocaleTimeString([], {
+          hour: "numeric",
+          minute: "2-digit",
+        }),
+        read: false,
+      });
+      setFormData({ name: "", email: "", subject: "", message: "" });
+      setStatus("Message sent successfully.");
+    } catch (error) {
+      setStatus(`Unable to send message: ${error.message}`);
+    }
+  };
+
   return (
     <section className="contact" id="contact">
       <div className="section-heading">
@@ -45,12 +94,30 @@ function Contact() {
             >
               <FaLinkedin />
             </a>
+
+            <a
+              href="https://twitter.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Twitter"
+            >
+              <FaTwitter />
+            </a>
+
+            <a
+              href="https://instagram.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+            >
+              <FaInstagram />
+            </a>
           </div>
         </div>
 
         {/* Contact Form */}
 
-        <form className="contact-form">
+        <form className="contact-form" onSubmit={handleSubmit}>
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="name">Name</label>
@@ -60,6 +127,8 @@ function Contact() {
                 id="name"
                 name="name"
                 placeholder="Your name"
+                value={formData.name}
+                onChange={handleChange}
                 required
               />
             </div>
@@ -72,6 +141,8 @@ function Contact() {
                 id="email"
                 name="email"
                 placeholder="Your email"
+                value={formData.email}
+                onChange={handleChange}
                 required
               />
             </div>
@@ -85,6 +156,8 @@ function Contact() {
               id="subject"
               name="subject"
               placeholder="Project subject"
+              value={formData.subject}
+              onChange={handleChange}
               required
             />
           </div>
@@ -97,6 +170,8 @@ function Contact() {
               name="message"
               rows="6"
               placeholder="Tell me about your project..."
+              value={formData.message}
+              onChange={handleChange}
               required
             ></textarea>
           </div>
@@ -104,6 +179,8 @@ function Contact() {
           <button type="submit" className="send-btn">
             Send Message
           </button>
+
+          {status && <p>{status}</p>}
         </form>
       </div>
     </section>

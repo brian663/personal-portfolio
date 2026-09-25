@@ -1,51 +1,35 @@
+import { useEffect, useState } from "react";
 import {
   FaHtml5,
   FaCss3Alt,
   FaJs,
   FaReact,
+  FaCode,
   FaDatabase,
   FaGitAlt,
 } from "react-icons/fa";
 
 import { SiFirebase } from "react-icons/si";
+import { subscribeToSkills } from "../services/skillService.js";
+
 function Skills() {
-  const skills = [
-    {
-      name: "HTML",
-      category: "Frontend",
-      icon: <FaHtml5 />,
-    },
-    {
-      name: "CSS",
-      category: "Frontend",
-      icon: <FaCss3Alt />,
-    },
-    {
-      name: "JavaScript",
-      category: "Frontend",
-      icon: <FaJs />,
-    },
-    {
-      name: "React",
-      category: "Frontend",
-      icon: <FaReact />,
-    },
-    {
-      name: "MySQL",
-      category: "Database",
-      icon: <FaDatabase />,
-    },
-    {
-      name: "Firebase",
-      category: "Backend",
-      icon: <SiFirebase />,
-    },
-    {
-      name: "Git",
-      category: "Tools",
-      icon: <FaGitAlt />,
-    },
-  ];
+  const [skills, setSkills] = useState([]);
+
+  useEffect(() => subscribeToSkills(setSkills), []);
+
+  const getSkillIcon = (name) => {
+    const icons = {
+      HTML: <FaHtml5 />,
+      CSS: <FaCss3Alt />,
+      JavaScript: <FaJs />,
+      React: <FaReact />,
+      MySQL: <FaDatabase />,
+      Firebase: <SiFirebase />,
+      Git: <FaGitAlt />,
+    };
+
+    return icons[name] || <FaCode />;
+  };
 
   return (
     <section className="skills" id="skills">
@@ -55,9 +39,9 @@ function Skills() {
       </div>
 
       <div className="skills-grid">
-        {skills.map((skill, index) => (
-          <div className="skill-item" key={index}>
-            <div className="skill-icon">{skill.icon}</div>
+        {skills.map((skill) => (
+          <div className="skill-item" key={skill.id}>
+            <div className="skill-icon">{getSkillIcon(skill.name)}</div>
 
             <div className="skill-info">
               <h3>{skill.name}</h3>

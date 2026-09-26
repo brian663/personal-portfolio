@@ -8,8 +8,10 @@ import {
 } from "react-icons/fa";
 
 import { addMessage } from "../services/messageService.js";
+import { useScrollReveal } from "../hooks/useScrollReveal.js";
 
 function Contact() {
+  const [sectionRef, isVisible] = useScrollReveal();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -51,7 +53,11 @@ function Contact() {
   };
 
   return (
-    <section className="contact" id="contact">
+    <section
+      ref={sectionRef}
+      className={`contact scroll-reveal ${isVisible ? "is-visible" : ""}`}
+      id="contact"
+    >
       <div className="section-heading">
         <span>GET IN TOUCH</span>
         <h2>Let's Work Together</h2>

@@ -1,6 +1,14 @@
+import { useScrollReveal } from "../hooks/useScrollReveal.js";
+
 function About() {
+  const [sectionRef, isVisible] = useScrollReveal();
+
   return (
-    <section className="about" id="about">
+    <section
+      ref={sectionRef}
+      className={`about scroll-reveal ${isVisible ? "is-visible" : ""}`}
+      id="about"
+    >
       <div className="section-heading">
         <span>ABOUT ME</span>
         <h2>Who I am</h2>

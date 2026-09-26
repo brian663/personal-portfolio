@@ -11,9 +11,11 @@ import {
 
 import { SiFirebase } from "react-icons/si";
 import { subscribeToSkills } from "../services/skillService.js";
+import { useScrollReveal } from "../hooks/useScrollReveal.js";
 
 function Skills() {
   const [skills, setSkills] = useState([]);
+  const [sectionRef, isVisible] = useScrollReveal();
 
   useEffect(() => subscribeToSkills(setSkills), []);
 
@@ -32,7 +34,11 @@ function Skills() {
   };
 
   return (
-    <section className="skills" id="skills">
+    <section
+      ref={sectionRef}
+      className={`skills scroll-reveal ${isVisible ? "is-visible" : ""}`}
+      id="skills"
+    >
       <div className="section-heading">
         <span>MY SKILLS</span>
         <h2>Technologies I Use</h2>

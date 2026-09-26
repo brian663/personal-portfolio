@@ -1,13 +1,19 @@
 import { useEffect, useState } from "react";
 import { subscribeToProjects } from "../services/projectService.js";
+import { useScrollReveal } from "../hooks/useScrollReveal.js";
 
 function Projects() {
   const [projects, setProjects] = useState([]);
+  const [sectionRef, isVisible] = useScrollReveal();
 
   useEffect(() => subscribeToProjects(setProjects), []);
 
   return (
-    <section className="projects" id="projects">
+    <section
+      ref={sectionRef}
+      className={`projects scroll-reveal ${isVisible ? "is-visible" : ""}`}
+      id="projects"
+    >
       <div className="section-heading">
         <span>MY WORK</span>
         <h2>Featured Projects</h2>

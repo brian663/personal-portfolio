@@ -1,6 +1,14 @@
+import { useScrollReveal } from "../hooks/useScrollReveal.js";
+
 function Hero() {
+  const [sectionRef, isVisible] = useScrollReveal({ threshold: 0.05 });
+
   return (
-    <section className="hero" id="home">
+    <section
+      ref={sectionRef}
+      className={`hero scroll-reveal ${isVisible ? "is-visible" : ""}`}
+      id="home"
+    >
       <div className="hero-content">
         <p className="hero-greeting">Hello, I'm</p>
 
@@ -28,45 +36,12 @@ function Hero() {
       </div>
 
       <div className="hero-visual">
-        <div className="code-card">
-          <div className="code-header">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-
-          <div className="code-content">
-            <p>
-              <span className="code-purple">const</span>{" "}
-              <span className="code-blue">developer</span> = {"{"}
-            </p>
-
-            <p className="indent">
-              name: <span className="code-green">"Brian Muturi"</span>,
-            </p>
-
-            <p className="indent">
-              role: <span className="code-green">"Software Engineer"</span>,
-            </p>
-
-            <p className="indent">skills: [</p>
-
-            <p className="indent-2">
-              <span className="code-green">"React"</span>,
-            </p>
-
-            <p className="indent-2">
-              <span className="code-green">"JavaScript"</span>,
-            </p>
-
-            <p className="indent-2">
-              <span className="code-green">"MySQL"</span>
-            </p>
-
-            <p className="indent">]</p>
-
-            <p>{"}"}</p>
-          </div>
+        <div className="hero-image-frame">
+          <img
+            className="hero-image"
+            src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=85"
+            alt="Laptop and code editor on a developer's desk"
+          />
         </div>
       </div>
     </section>

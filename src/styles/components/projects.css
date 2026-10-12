@@ -1,0 +1,170 @@
+/* =========================
+   PROJECTS SECTION
+========================= */
+
+.projects {
+    padding: 100px 8%;
+    background: var(--bg);
+}
+
+.projects-grid {
+    max-width: 1100px;
+    margin: auto;
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 25px;
+}
+
+/* =========================
+   PROJECT CARD
+========================= */
+
+.featured-project-card {
+    min-height: 430px;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+
+    border: 1px solid var(--border);
+    border-radius: 10px;
+
+    background: var(--surface);
+
+    transition: 0.3s;
+}
+
+.featured-project-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--aqua);
+}
+
+/* =========================
+   PROJECT IMAGE
+========================= */
+
+.project-image {
+    height: 200px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background:
+        linear-gradient(135deg,
+            var(--surface),
+            var(--bg));
+
+    border-bottom: 1px solid var(--border);
+}
+
+.project-image span {
+    color: var(--muted-text);
+
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+}
+
+/* =========================
+   PROJECT CONTENT
+========================= */
+
+.project-content {
+    flex: 1;
+
+    padding: 25px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.project-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin-bottom: 15px;
+}
+
+.project-top h3 {
+    font-size: 1.1rem;
+}
+
+.project-link {
+    width: 35px;
+    height: 35px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid var(--border);
+    border-radius: 50%;
+
+    color: var(--aqua);
+
+    transition: 0.3s;
+}
+
+.project-link:hover {
+    background: var(--aqua);
+    color: var(--bg);
+}
+
+/* Description */
+
+.project-content>p {
+    color: var(--muted-text);
+
+    font-size: 0.9rem;
+    line-height: 1.7;
+
+    margin-bottom: 20px;
+}
+
+/* =========================
+   TECHNOLOGIES
+========================= */
+
+.project-tech {
+    margin-top: auto;
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.project-tech span {
+    padding: 5px 9px;
+
+    border: 1px solid var(--border);
+    border-radius: 4px;
+
+    color: var(--muted-text);
+
+    font-size: 0.7rem;
+}
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 900px) {
+    .projects-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .projects {
+        padding: 80px 5%;
+    }
+
+    .projects-grid {
+        grid-template-columns: 1fr;
+    }
+}

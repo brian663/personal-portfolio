@@ -34,7 +34,7 @@ function Navbar({ siteName, homepage }) {
     <nav className="navbar">
       <h2 className="logo">
         {siteName}
-        <span>.</span>
+        <span></span>
       </h2>
 
       <div className={`nav-links ${menuOpen ? "open" : ""}`}>

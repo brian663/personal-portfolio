@@ -1,0 +1,120 @@
+/* =========================
+   SKILLS
+========================= */
+
+.skills {
+    padding: 100px 8%;
+    background: var(--surface);
+}
+
+.skills-grid {
+    max-width: 1100px;
+    margin: auto;
+
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+
+    border-top: 1px solid var(--border);
+    border-left: 1px solid var(--border);
+}
+
+.skill-item {
+    min-height: 140px;
+
+    padding: 25px;
+
+    display: flex;
+    align-items: center;
+    gap: 18px;
+
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+
+    transition: 0.3s;
+}
+
+.skill-item:hover {
+    background: var(--bg);
+    border-color: var(--aqua);
+}
+
+/* Icon */
+
+.skill-icon {
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid var(--border);
+    border-radius: 8px;
+
+    color: var(--aqua);
+
+    font-size: 1.7rem;
+
+    flex-shrink: 0;
+
+    transition: 0.3s;
+}
+
+.skill-item:hover .skill-icon {
+    border-color: var(--aqua);
+    transform: translateY(-3px);
+}
+
+/* Skill information */
+
+.skill-info {
+    flex: 1;
+}
+
+.skill-info h3 {
+    font-size: 1rem;
+    margin-bottom: 6px;
+}
+
+.skill-info p {
+    color: var(--muted-text);
+    font-size: 0.75rem;
+}
+
+/* Arrow */
+
+.skill-arrow {
+    color: var(--muted-text);
+    font-size: 1.2rem;
+
+    transition: 0.3s;
+}
+
+.skill-item:hover .skill-arrow {
+    color: var(--aqua);
+    transform: translate(3px, -3px);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 900px) {
+    .skills-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 550px) {
+    .skills {
+        padding: 80px 5%;
+    }
+
+    .skills-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .skill-item {
+        min-height: 100px;
+    }
+}

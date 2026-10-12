@@ -339,7 +339,6 @@ function ManageProjects() {
                   ) : (
                     <>
                       <Image size={31} />
-
                       <span>No image</span>
                     </>
                   )}

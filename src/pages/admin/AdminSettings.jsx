@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import {
@@ -20,16 +20,85 @@ import {
   Sun,
   Moon,
 } from "lucide-react";
+
 import {
   defaultSettings,
   loadSettings,
   saveSettings,
+  subscribeToSettings,
+  mergeSettings,
 } from "../../settings/siteSettings.js";
 
 function AdminSettings() {
-  const [settings, setSettings] = useState(loadSettings);
+  const [settings, setSettings] = useState(defaultSettings);
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
+  // Load settings from Firestore and listen for remote changes.
+  useEffect(() => {
+    let active = true;
+    let unsubscribe = () => {};
+
+    async function initializeSettings() {
+      try {
+        const data = await loadSettings();
+
+        if (active) {
+          setSettings(mergeSettings(data));
+          setError("");
+        }
+      } catch (err) {
+        console.error("Failed to load website settings:", err);
+
+        if (active) {
+          setError(
+            "Unable to load settings from Firebase. Check your connection and Firestore permissions.",
+          );
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    try {
+      unsubscribe = subscribeToSettings(
+        (data) => {
+          if (active) {
+            setSettings(mergeSettings(data));
+            setError("");
+          }
+        },
+        (err) => {
+          console.error("Settings subscription failed:", err);
+
+          if (active) {
+            setError(
+              "Live updates are unavailable. Check your Firestore permissions.",
+            );
+          }
+        },
+      );
+    } catch (err) {
+      console.error("Could not subscribe to settings:", err);
+
+      if (active) {
+        setError("Could not connect to the Firebase settings document.");
+      }
+    }
+
+    initializeSettings();
+
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, []);
+
+  // Update ordinary form fields.
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -41,6 +110,7 @@ function AdminSettings() {
     setSaved(false);
   };
 
+  // Update nested settings such as social, homepage and contact.
   const handleNestedChange = (section, name, value) => {
     setSettings((previous) => ({
       ...previous,
@@ -53,6 +123,7 @@ function AdminSettings() {
     setSaved(false);
   };
 
+  // Change website availability.
   const handleSiteStatus = (status) => {
     setSettings((previous) => ({
       ...previous,
@@ -62,31 +133,76 @@ function AdminSettings() {
     setSaved(false);
   };
 
+  // Change appearance preference.
   const handleTheme = (theme) => {
-    setSettings((previous) => ({ ...previous, theme }));
+    setSettings((previous) => ({
+      ...previous,
+      theme,
+    }));
+
     setSaved(false);
   };
 
-  const handleSave = () => {
-    saveSettings(settings);
-    setSaved(true);
+  // Save settings to the shared Firestore document.
+  const handleSave = async () => {
+    setSaving(true);
+    setSaved(false);
+    setError("");
 
-    setTimeout(() => {
-      setSaved(false);
-    }, 3000);
+    try {
+      await saveSettings(settings);
+
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      console.error("Failed to save website settings:", err);
+
+      setError(
+        "Failed to save settings. Check your internet connection and Firestore security rules.",
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleReset = () => {
+  // Reset shared settings for all devices.
+  const handleReset = async () => {
     const confirmed = window.confirm(
-      "Reset all settings to their default values?",
+      "Reset all shared website settings to their defaults? This will affect every device using this portfolio.",
     );
 
     if (!confirmed) return;
 
-    setSettings(defaultSettings);
-    saveSettings(defaultSettings);
+    setSaving(true);
     setSaved(false);
+    setError("");
+
+    try {
+      await saveSettings(defaultSettings);
+
+      setSettings(defaultSettings);
+      setSaved(true);
+
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      console.error("Failed to reset website settings:", err);
+
+      setError("Unable to reset settings. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
+
+  // Display a loading state while retrieving the initial settings.
+  if (loading) {
+    return (
+      <div className="admin-page">
+        <main className="admin-section">
+          <p>Loading website settings from Firebase...</p>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="admin-page">
@@ -100,7 +216,6 @@ function AdminSettings() {
 
           <div>
             <h1>Settings</h1>
-
             <p>Control your portfolio, website and administrator settings.</p>
           </div>
         </div>
@@ -112,9 +227,7 @@ function AdminSettings() {
       </header>
 
       <main className="admin-section settings-section">
-        {/* =====================================
-            SITE IDENTITY
-        ===================================== */}
+        {/* SITE IDENTITY */}
 
         <section className="settings-card">
           <div className="settings-card-header">
@@ -124,7 +237,6 @@ function AdminSettings() {
 
             <div>
               <h2>Site Identity</h2>
-
               <p>
                 Control the main information displayed on your public portfolio.
               </p>
@@ -218,9 +330,7 @@ function AdminSettings() {
           </div>
         </section>
 
-        {/* =====================================
-            LIVE SITE
-        ===================================== */}
+        {/* LIVE SITE */}
 
         <section className="settings-card">
           <div className="settings-card-header">
@@ -230,7 +340,6 @@ function AdminSettings() {
 
             <div>
               <h2>Live Site</h2>
-
               <p>
                 Control whether your public portfolio is available to visitors.
               </p>
@@ -309,6 +418,8 @@ function AdminSettings() {
           </div>
         </section>
 
+        {/* APPEARANCE */}
+
         <section className="settings-card">
           <div className="settings-card-header">
             <div className="settings-card-icon">
@@ -356,9 +467,7 @@ function AdminSettings() {
           </div>
         </section>
 
-        {/* =====================================
-            HOMEPAGE SECTIONS
-        ===================================== */}
+        {/* HOMEPAGE SECTIONS */}
 
         <section className="settings-card">
           <div className="settings-card-header">
@@ -368,7 +477,6 @@ function AdminSettings() {
 
             <div>
               <h2>Homepage Sections</h2>
-
               <p>Choose which sections are visible on your public portfolio.</p>
             </div>
           </div>
@@ -389,7 +497,6 @@ function AdminSettings() {
               <div className="settings-toggle-item" key={key}>
                 <div>
                   <strong>{title}</strong>
-
                   <span>{description}</span>
                 </div>
 
@@ -404,6 +511,7 @@ function AdminSettings() {
                     handleNestedChange("homepage", key, !settings.homepage[key])
                   }
                   aria-label={`Toggle ${title}`}
+                  aria-pressed={Boolean(settings.homepage[key])}
                 >
                   <span />
                 </button>
@@ -412,9 +520,7 @@ function AdminSettings() {
           </div>
         </section>
 
-        {/* =====================================
-            SOCIAL LINKS
-        ===================================== */}
+        {/* SOCIAL LINKS */}
 
         <section className="settings-card">
           <div className="settings-card-header">
@@ -424,7 +530,6 @@ function AdminSettings() {
 
             <div>
               <h2>Social Links</h2>
-
               <p>Manage the social profiles displayed on your portfolio.</p>
             </div>
           </div>
@@ -488,9 +593,7 @@ function AdminSettings() {
           </div>
         </section>
 
-        {/* =====================================
-            CONTACT SETTINGS
-        ===================================== */}
+        {/* CONTACT SETTINGS */}
 
         <section className="settings-card">
           <div className="settings-card-header">
@@ -500,95 +603,55 @@ function AdminSettings() {
 
             <div>
               <h2>Contact Settings</h2>
-
               <p>Control which contact information is visible to visitors.</p>
             </div>
           </div>
 
           <div className="settings-toggle-list">
-            <div className="settings-toggle-item">
-              <div>
-                <strong>Show Email</strong>
+            {[
+              [
+                "showEmail",
+                "Show Email",
+                "Display your email address publicly.",
+              ],
+              [
+                "showPhone",
+                "Show Phone",
+                "Display your phone number publicly.",
+              ],
+              [
+                "showLocation",
+                "Show Location",
+                "Display your general location publicly.",
+              ],
+            ].map(([key, title, description]) => (
+              <div className="settings-toggle-item" key={key}>
+                <div>
+                  <strong>{title}</strong>
+                  <span>{description}</span>
+                </div>
 
-                <span>Display your email address publicly.</span>
+                <button
+                  type="button"
+                  className={
+                    settings.contact[key]
+                      ? "toggle-switch active"
+                      : "toggle-switch"
+                  }
+                  onClick={() =>
+                    handleNestedChange("contact", key, !settings.contact[key])
+                  }
+                  aria-label={`Toggle ${title}`}
+                  aria-pressed={Boolean(settings.contact[key])}
+                >
+                  <span />
+                </button>
               </div>
-
-              <button
-                type="button"
-                className={
-                  settings.contact.showEmail
-                    ? "toggle-switch active"
-                    : "toggle-switch"
-                }
-                onClick={() =>
-                  handleNestedChange(
-                    "contact",
-                    "showEmail",
-                    !settings.contact.showEmail,
-                  )
-                }
-              >
-                <span />
-              </button>
-            </div>
-
-            <div className="settings-toggle-item">
-              <div>
-                <strong>Show Phone</strong>
-
-                <span>Display your phone number publicly.</span>
-              </div>
-
-              <button
-                type="button"
-                className={
-                  settings.contact.showPhone
-                    ? "toggle-switch active"
-                    : "toggle-switch"
-                }
-                onClick={() =>
-                  handleNestedChange(
-                    "contact",
-                    "showPhone",
-                    !settings.contact.showPhone,
-                  )
-                }
-              >
-                <span />
-              </button>
-            </div>
-
-            <div className="settings-toggle-item">
-              <div>
-                <strong>Show Location</strong>
-
-                <span>Display your general location publicly.</span>
-              </div>
-
-              <button
-                type="button"
-                className={
-                  settings.contact.showLocation
-                    ? "toggle-switch active"
-                    : "toggle-switch"
-                }
-                onClick={() =>
-                  handleNestedChange(
-                    "contact",
-                    "showLocation",
-                    !settings.contact.showLocation,
-                  )
-                }
-              >
-                <span />
-              </button>
-            </div>
+            ))}
           </div>
         </section>
 
-        {/* =====================================
-            ADMIN PROFILE
-        ===================================== */}
+        {/* ADMIN PROFILE */}
 
         <section className="settings-card">
           <div className="settings-card-header">
@@ -598,7 +661,6 @@ function AdminSettings() {
 
             <div>
               <h2>Administrator Profile</h2>
-
               <p>
                 Information about the administrator managing this portfolio.
               </p>
@@ -621,27 +683,22 @@ function AdminSettings() {
           <div className="settings-admin-info">
             <div>
               <span>Administrator</span>
-
               <strong>{settings.admin.name}</strong>
             </div>
 
             <div>
               <span>Role</span>
-
               <strong>{settings.admin.role}</strong>
             </div>
 
             <div>
               <span>Authentication</span>
-
               <strong>Firebase Auth</strong>
             </div>
           </div>
         </section>
 
-        {/* =====================================
-            SYSTEM INFORMATION
-        ===================================== */}
+        {/* SYSTEM INFORMATION */}
 
         <section className="settings-card">
           <div className="settings-card-header">
@@ -651,33 +708,28 @@ function AdminSettings() {
 
             <div>
               <h2>System Information</h2>
-
-              <p>Current BRITECH portfolio system configuration.</p>
+              <p>Current BMUTURI Digital portfolio system configuration.</p>
             </div>
           </div>
 
           <div className="system-info-grid">
             <div className="system-info-item">
               <span>Frontend</span>
-
               <strong>React + Vite</strong>
             </div>
 
             <div className="system-info-item">
               <span>Authentication</span>
-
               <strong className="status-active">Firebase Auth</strong>
             </div>
 
             <div className="system-info-item">
               <span>Database</span>
-
               <strong className="status-active">Firestore</strong>
             </div>
 
             <div className="system-info-item">
               <span>Environment</span>
-
               <strong>Development</strong>
             </div>
 
@@ -695,32 +747,45 @@ function AdminSettings() {
 
             <div className="system-info-item">
               <span>Admin Access</span>
-
               <strong className="status-active">Protected</strong>
             </div>
           </div>
         </section>
 
-        {/* =====================================
-            ACTIONS
-        ===================================== */}
+        {/* ACTIONS */}
 
         <div className="settings-actions">
+          {error && (
+            <div className="settings-error" role="alert">
+              {error}
+            </div>
+          )}
+
           {saved && (
-            <div className="settings-saved">
+            <div className="settings-saved" role="status">
               <CheckCircle2 size={15} />
               Changes saved successfully.
             </div>
           )}
 
-          <button type="button" className="secondary-btn" onClick={handleReset}>
+          <button
+            type="button"
+            className="secondary-btn"
+            onClick={handleReset}
+            disabled={saving}
+          >
             <RotateCcw size={15} />
             Reset
           </button>
 
-          <button type="button" className="primary-btn" onClick={handleSave}>
+          <button
+            type="button"
+            className="primary-btn"
+            onClick={handleSave}
+            disabled={saving}
+          >
             <Save size={16} />
-            Save Changes
+            {saving ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </main>

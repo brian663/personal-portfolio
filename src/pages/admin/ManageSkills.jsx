@@ -158,19 +158,9 @@ function ManageSkills() {
     }
   };
 
-  /* =========================================================
-     SKILL ICON
-  ========================================================= */
-
   const getSkillIcon = (category) => {
-    if (category === "Database") {
-      return <Layers size={21} />;
-    }
-
-    if (category === "Tools & Technologies") {
-      return <Wrench size={21} />;
-    }
-
+    if (category === "Database") return <Layers size={21} />;
+    if (category === "Tools & Technologies") return <Wrench size={21} />;
     return <Code2 size={21} />;
   };
 

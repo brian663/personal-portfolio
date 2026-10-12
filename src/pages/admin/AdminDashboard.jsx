@@ -64,7 +64,7 @@ function AdminDashboard() {
       <header className="admin-header">
         <div className="admin-brand">
           <h1>
-            BRI<span>TECH</span>
+            BM<span>DIGITAL</span>
           </h1>
 
           <p>Portfolio Management System</p>
